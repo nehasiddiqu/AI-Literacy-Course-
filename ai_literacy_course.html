@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Innovators | MYP AI Literacy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .module-card { transition: all 0.3s ease; }
+        .completed { border-left: 4px solid #10b981; }
+        .locked { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-20">
+
+    <div id="app" class="max-w-4xl mx-auto p-4 md:p-8">
+        <header class="mb-10 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-600">AI Innovators</h1>
+                <p class="text-slate-600">MYP AI Literacy Program for Years 7-9</p>
+            </div>
+            <button id="back-btn" onclick="showDashboard()" class="hidden bg-slate-200 px-4 py-2 rounded-lg font-medium hover:bg-slate-300">← Back to Dashboard</button>
+        </header>
+
+        <div id="progress-container" class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex justify-between text-sm font-semibold mb-2">
+                <span>Course Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-3">
+                <div id="progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div id="dashboard" class="grid gap-4"></div>
+        <div id="lesson-view" class="hidden bg-white p-8 rounded-2xl shadow-sm border border-slate-200"></div>
+
+        <div id="cert-section" class="hidden mt-12 bg-white p-8 rounded-2xl border-4 border-blue-600 text-center shadow-2xl">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Course Certificate</h2>
+            <p class="text-lg">This certifies that</p>
+            <input type="text" id="student-name" placeholder="Enter student name..." class="text-2xl font-bold border-b-2 border-slate-300 w-full text-center my-4 outline-none text-blue-800">
+            <p class="mb-8 text-slate-600">has completed the AI Literacy Foundations program.</p>
+            <button onclick="window.print()" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition">Download Certificate (PDF)</button>
+        </div>
+    </div>
+
+    <script>
+        const curriculum = [
+            {
+                id: 1,
+                title: "Module 1: The AI Foundation",
+                desc: "Understanding Machine Learning vs. Generative AI.",
+                content: `
+                    <h2 class="text-2xl font-bold mb-4">What is Artificial Intelligence?</h2>
+                    <p class="mb-4">AI is not magic—it is math! At its core, AI refers to computer systems designed to perform tasks that typically require human intelligence, such as recognizing patterns, making decisions, and generating language.</p>
+                    <h3 class="text-xl font-semibold mb-2">Key Concepts:</h3>
+                    <ul class="list-disc pl-5 mb-6 space-y-2">
+                        <li><strong>Machine Learning:</strong> Computers learning from patterns in data rather than being explicitly programmed for every rule.</li>
+                        <li><strong>Generative AI:</strong> Models trained to create new content, such as images, text, or music.</li>
+                    </ul>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
+                        <p class="font-semibold text-blue-800">Inquiry Challenge:</p>
+                        <p>Look around your house or school. Can you identify three things that use AI? How do they "learn" or "adapt" to your needs?</p>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: "Module 2: Data & Bias",
+                desc: "Analyzing how datasets shape AI decisions.",
+                content: `
+                    <h2 class="text-2xl font-bold mb-4">Data: The Fuel of AI</h2>
+                    <p class="mb-4">AI models are only as good as the data they are trained on. If we feed an AI biased, incomplete, or incorrect information, the output will mirror those errors.</p>
+                    <h3 class="text-xl font-semibold mb-2">The Bias Trap:</h3>
+                    <p class="mb-4">Algorithmic bias occurs when an AI system produces unfair results based on the prejudices found in its training data. This is a critical ethical challenge for designers.</p>
+                    <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-600">
+                        <p class="font-semibold text-amber-800">Class Activity:</p>
+                        <p>Research "Facial Recognition Bias." Why do some systems struggle to identify certain faces? How could we fix the dataset?</p>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                title: "Module 3: Ethics & Society",
+                desc: "Privacy, impact, and the IB Learner Profile.",
+                content: `
+                    <h2 class="text-2xl font-bold mb-4">AI, Privacy, and Our Future</h2>
+                    <p class="mb-4">As AI integrates into society, we must consider the IB Learner Profile—specifically being <strong>Reflective</strong> and <strong>Principled</strong>.</p>
+                    <ul class="list-disc pl-5 mb-6 space-y-2">
+                        <li><strong>Privacy:</strong> Who owns the data you feed into AI tools?</li>
+                        <li><strong>Authenticity:</strong> How do we discern between AI-generated content and human-created work?</li>
+                        <li><strong>Job Impact:</strong> How will AI shift the job market for your generation?</li>
+                    </ul>
+                    <div class="bg-emerald-50 p-4 rounded-lg border-l-4 border-emerald-600">
+                        <p class="font-semibold text-emerald-800">Discussion:</p>
+                        <p>Should AI be allowed to replace creative writers? Why or why not?</p>
+                    </div>
+                `
+            },
+            {
+                id: 4,
+                title: "Module 4: The AI Design Project",
+                desc: "Prototyping an AI solution for a community problem.",
+                content: `
+                    <h2 class="text-2xl font-bold mb-4">Your Final Challenge: The AI Innovator</h2>
+                    <p class="mb-4">Now it is your turn! Apply your learning to design a concept for an AI tool that solves a community problem.</p>
+                    <h3 class="text-xl font-semibold mb-2">Your Task:</h3>
+                    <ol class="list-decimal pl-5 mb-6 space-y-2">
+                        <li>Identify a community problem (e.g., food waste, local transit, litter).</li>
+                        <li>Define what "data" your AI would need.</li>
+                        <li>Propose a way to make it ethical and bias-free.</li>
+                    </ol>
+                    <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-600">
+                        <p class="font-semibold text-purple-800">Submission:</p>
+                        <p>Write your project summary in the box below and present it to your class.</p>
+                    </div>
+                `
+            }
+        ];
+
+        let completedModules = JSON.parse(localStorage.getItem('ai_progress')) || [];
+        let studentWork = JSON.parse(localStorage.getItem('ai_work')) || {};
+
+        function render() { showDashboard(); }
+
+        function showDashboard() {
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('lesson-view').classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+            
+            const container = document.getElementById('dashboard');
+            container.innerHTML = '';
+
+            curriculum.forEach(mod => {
+                const isDone = completedModules.includes(mod.id);
+                const isLocked = mod.id > 1 && !completedModules.includes(mod.id - 1);
+                
+                const card = document.createElement('div');
+                card.className = `module-card p-6 rounded-xl border ${isDone ? 'completed bg-green-50 border-green-200' : 'bg-white border-slate-200'} ${isLocked ? 'locked' : 'shadow-sm cursor-pointer hover:shadow-md'}`;
+                
+                if (!isLocked) {
+                    card.onclick = () => viewModule(mod.id);
+                }
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold ${isDone ? 'text-green-800' : 'text-slate-800'}">${isLocked ? '🔒 Locked' : mod.title}</h3>
+                            <p class="text-slate-600">${isLocked ? 'Complete previous module to unlock.' : mod.desc}</p>
+                        </div>
+                        <div class="text-sm font-medium ${isDone ? 'text-green-600' : 'text-blue-600'}">
+                            ${isDone ? 'Completed' : (isLocked ? '' : 'View Module')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+
+        function viewModule(id) {
+            const mod = curriculum.find(m => m.id === id);
+            const isDone = completedModules.includes(id);
+            const view = document.getElementById('lesson-view');
+            
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('back-btn').classList.remove('hidden');
+            view.classList.remove('hidden');
+            
+            view.innerHTML = `
+                ${mod.content}
+                <div class="mt-8 pt-8 border-t">
+                    <h3 class="text-lg font-bold mb-3">Mandatory Reflection/Work:</h3>
+                    <p class="text-sm text-slate-500 mb-2">You must complete this section to move to the next module.</p>
+                    <textarea id="work-input-${id}" class="w-full h-32 p-4 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Type your reflections here...">${studentWork[id] || ''}</textarea>
+                    
+                    <div class="mt-8">
+                        <button onclick="attemptComplete(${mod.id})" class="w-full py-4 rounded-xl font-bold ${isDone ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-blue-600 text-white hover:bg-blue-700'} transition">
+                            ${isDone ? 'Module Completed (Click to Edit Work)' : 'Submit & Complete Module'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function attemptComplete(id) {
+            const content = document.getElementById(`work-input-${id}`).value;
+            
+            // Validation: Must be at least 50 characters to count as "work"
+            if (content.length < 50) {
+                showToast("Please provide a more detailed response (at least 50 characters) to complete this module.", "bg-red-500");
+                return;
+            }
+            
+            // Save current work
+            studentWork[id] = content;
+            localStorage.setItem('ai_work', JSON.stringify(studentWork));
+            
+            // Proceed to toggle status
+            toggleModule(id);
+            showToast("Work saved! Module status updated.", "bg-green-600");
+        }
+
+        function toggleModule(id) {
+            if (!completedModules.includes(id)) {
+                completedModules.push(id);
+                localStorage.setItem('ai_progress', JSON.stringify(completedModules));
+            }
+            viewModule(id);
+            updateProgress();
+        }
+
+        function showToast(msg, color) {
+            const div = document.createElement('div');
+            div.className = `fixed bottom-5 right-5 ${color} text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce`;
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const percent = (completedModules.length / curriculum.length) * 100;
+            progressBar.style.width = `${percent}%`;
+            progressText.innerText = `${Math.round(percent)}%`;
+
+            if (completedModules.length === curriculum.length) {
+                document.getElementById('cert-section').classList.remove('hidden');
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
